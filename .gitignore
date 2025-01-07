@@ -1,0 +1,61 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool
+*.out
+
+# Logs
+*.log
+logs/
+
+# Dependency directories (vendor/)
+vendor/
+
+# Go module files
+/go.sum
+/go.work
+/go.work.sum
+
+# IDE specific files
+.idea/
+*.iml
+
+# Go build artifacts
+*.test  # Temporary test binaries
+*.prof  # Profiling data
+
+# Compiled object files
+*.o
+*.a
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# System-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variable files
+.env
+.env.*
+
+# Coverage tool files
+coverage.out
+/coverage/
+
+# Build output directories
+
+# Ignore everything in the bin folder
+/bin/*
+
+# But track the .gitkeep file inside the bin folder to keep the folder itself
+!/bin/.gitkeep
+
+/build/
