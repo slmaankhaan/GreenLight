@@ -8,6 +8,9 @@ import (
 	"strconv"
 )
 
+// Define an envelope type
+type envelope map[string]interface{}
+
 func (app *application) readIDParam(r *http.Request) (int64, error) {
 	params := httprouter.ParamsFromContext(r.Context())
 
@@ -20,8 +23,8 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 
 // Reusable write JSON
 
-func (app *application) writeJSON(w http.ResponseWriter, status int, data interface{}, header http.Header) error {
-	js, err := json.Marshal(data)
+func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, header http.Header) error {
+	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
 	}
