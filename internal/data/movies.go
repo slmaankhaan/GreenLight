@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/lib/pq"
 	"github.com/slmaankhaan/GreenLight/internal/validator"
 	"time"
@@ -51,7 +52,34 @@ func (m MovieModel) Insert(movie *Movie) error {
 
 // Add a placeholder method for fetching a specific record from the movies table.
 func (m MovieModel) Get(id int64) (*Movie, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	// Define the SQL query for retrieving the movie data.
+	query := `
+		SELECT id, created_at, title, year, runtime, genres, version
+		FROM movies
+		WHERE id = $1`
+	// Declare a Movie struct to hold the data returned by the query.
+	var movie Movie
+	err := m.DB.QueryRow(query, id).Scan(
+		&movie.ID,
+		&movie.CreatedAt,
+		&movie.Title,
+		&movie.Year,
+		&movie.Runtime,
+		pq.Array(&movie.Genres),
+		&movie.Version,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &movie, nil
 }
 
 // Add a placeholder method for updating a specific record in the movies table.
