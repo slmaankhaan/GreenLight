@@ -163,20 +163,23 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 }
 func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title    string
-		Genres   []string
-		Page     int
-		PageSize int
-		Sort     string
+		Title  string
+		Genres []string
+		data.Filters
 	}
 
 	v := validator.New()
+
 	qs := r.URL.Query()
+
 	input.Title = app.readString(qs, "title", "")
 	input.Genres = app.readCSV(qs, "genres", []string{})
-	input.Page = app.readInt(qs, "page", 1, v)
-	input.PageSize = app.readInt(qs, "page_size", 20, v)
-	input.Sort = app.readString(qs, "sort", "id")
+	// Read the page and page_size query string values into the embedded struct.
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	// Read the sort query string value into the embedded struct.
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
