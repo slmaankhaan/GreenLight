@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/slmaankhaan/GreenLight/internal/data"
-	"log"
+	"github.com/slmaankhaan/GreenLight/internal/jsonlog"
 	"net/http"
 	"os"
 	"time"
@@ -29,7 +29,7 @@ type config struct {
 
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models data.Models
 }
 
@@ -47,14 +47,15 @@ func main() {
 	flag.Parse()
 
 	// Initialize logger
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	db, err := openDB(cfg)
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
-	logger.Printf("database connection established")
+	// Likewise use the PrintInfo() method to write a message at the INFO level.
+	logger.PrintInfo("database connection pool established", nil)
 
 	app := &application{
 		config: cfg,
@@ -71,10 +72,13 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// Start the server
-	logger.Printf("Starting %s server on port %d", cfg.env, cfg.port)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.env,
+	})
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	// Use the PrintFatal() method to log the error and exit.
+	logger.PrintFatal(err, nil)
 }
 
 func openDB(cfg config) (*sql.DB, error) {
