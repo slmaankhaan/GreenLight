@@ -33,8 +33,8 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	v := validator.New()
-	// Validate the user struct and return the error messages to the client if any of
-	// the checks fail.
+
+	// Validate the user struct and return the error messages to the client if any of the checks fail.
 	if data.ValidateUser(v, user); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
@@ -51,9 +51,15 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-	// Write a JSON response containing the user data along with a 201 Created status
-	// code.
-	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
+
+	// Use the background helper to execute an anonymous function that sends the welcome email.
+	app.background(func() {
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
